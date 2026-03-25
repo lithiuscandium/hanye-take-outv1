@@ -44,6 +44,22 @@ const _sfc_main = /* @__PURE__ */ common_vendor.defineComponent({
       }
       return item;
     };
+    const isPublicAddress = (item) => Number((item == null ? void 0 : item.isPublic) || 0) === 1;
+    const getContactText = (item) => {
+      if (isPublicAddress(item)) {
+        return item.consignee || "校园公共地址";
+      }
+      if (!item.consignee) {
+        return "";
+      }
+      return item.gender === 1 ? `${item.consignee} 男士` : `${item.consignee} 女士`;
+    };
+    const getPhoneText = (item) => {
+      if (isPublicAddress(item)) {
+        return "全员可选";
+      }
+      return item.phone || "";
+    };
     const addOrEdit = (type, item) => {
       if (type === "新增") {
         common_vendor.index.redirectTo({
@@ -82,23 +98,29 @@ const _sfc_main = /* @__PURE__ */ common_vendor.defineComponent({
       }, addressList.value && addressList.value.length > 0 ? {
         b: common_vendor.f(addressList.value, (item, index, i0) => {
           return common_vendor.e({
-            a: common_vendor.t(getLableVal(item.label)),
-            b: common_vendor.n("tag" + trans(item.label)),
+            a: common_vendor.t(isPublicAddress(item) ? "校园" : getLableVal(item.label)),
+            b: common_vendor.n(isPublicAddress(item) ? "tag3" : "tag" + trans(item.label)),
             c: common_vendor.t(item.provinceName),
             d: common_vendor.t(item.cityName),
             e: common_vendor.t(item.districtName),
             f: common_vendor.t(item.detail),
-            g: common_vendor.t(item.gender === 1 ? item.consignee + " 男士" : item.consignee + " 女士"),
-            h: common_vendor.t(item.phone),
-            i: common_vendor.o(($event) => addOrEdit("编辑", item), index),
-            j: common_vendor.o(($event) => choseAddress(index, item), index)
-          }, testValue.value ? {
-            k: String(item.id),
-            l: item.isDefault === 1,
-            m: common_vendor.o(($event) => getRadio(index, item), index)
+            g: common_vendor.t(getContactText(item)),
+            h: common_vendor.t(getPhoneText(item)),
+            i: !isPublicAddress(item)
+          }, !isPublicAddress(item) ? {
+            j: common_vendor.o(($event) => addOrEdit("编辑", item), index)
           } : {}, {
-            n: common_vendor.o(($event) => getRadio(index, item), index),
-            o: index
+            k: common_vendor.o(($event) => choseAddress(index, item), index)
+          }, testValue.value ? {
+            l: String(item.id),
+            m: item.isDefault === 1,
+            n: common_vendor.o(($event) => getRadio(index, item), index)
+          } : {}, {
+            o: common_vendor.t(isPublicAddress(item) ? "设为默认地址（保存到我的地址）" : "设为默认地址"),
+            p: common_vendor.o(($event) => getRadio(index, item), index),
+            q: isPublicAddress(item)
+          }, isPublicAddress(item) ? {} : {}, {
+            r: index
           });
         }),
         c: testValue.value
@@ -114,5 +136,5 @@ const _sfc_main = /* @__PURE__ */ common_vendor.defineComponent({
     };
   }
 });
-const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-2312e3da"], ["__file", "D:/MyCode/public_project/hanye-take-out/hanye-take-out-uniapp/src/pages/address/address.vue"]]);
+const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-2312e3da"], ["__file", "D:/new1/hanye-take-out/hanye-take-out-uniapp/src/pages/address/address.vue"]]);
 wx.createPage(MiniProgramPage);

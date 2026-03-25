@@ -11,6 +11,20 @@
     "minified": false,
     "newFeature": true,
     "bigPackageSizeSupport": true,
+    "compileWorklet": false,
+    "uglifyFileName": false,
+    "uploadWithSourceMap": true,
+    "enhance": false,
+    "packNpmManually": false,
+    "packNpmRelationList": [],
+    "minifyWXSS": true,
+    "minifyWXML": true,
+    "localPlugins": false,
+    "disableUseStrict": false,
+    "useCompilerPlugins": false,
+    "condition": false,
+    "swc": false,
+    "disableSWC": true,
     "babelSetting": {
       "ignore": [],
       "disablePlugins": [],
@@ -18,8 +32,8 @@
     }
   },
   "compileType": "miniprogram",
-  "libVersion": "3.4.6",
-  "appid": "wxbd5d45c4c0860e6d",
+  "libVersion": "3.14.3",
+  "appid": "wxec995f072c0c8b5b",
   "projectname": "",
   "condition": {
     "search": {
@@ -39,8 +53,6 @@
       "list": []
     }
   },
-  "editorSetting": {
-    "tabIndent": "insertSpaces",
-    "tabSize": 2
-  }
+  "simulatorPluginLibVersion": {},
+  "editorSetting": {}
 }

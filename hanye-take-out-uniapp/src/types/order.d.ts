@@ -64,6 +64,68 @@ export type OrderVO = Order & {
   orderDetailList: OrderDetail[]
 }
 
+// 地图点位
+export type CampusPointVO = Partial<{
+  nodeId: number
+  name: string
+  lng: number
+  lat: number
+}>
+
+// 订单轨迹信息
+export type OrderTrackVO = Partial<{
+  orderId: number
+  dispatchStatus: number
+  riderName: string
+  riderPhone: string
+  etaSec: number
+  progressIndex: number
+  totalPoints: number
+  shopPoint: CampusPointVO
+  dropoffPoint: CampusPointVO
+  riderPoint: CampusPointVO
+  routePoints: CampusPointVO[]
+}>
+
+export type CampusGraphNodeVO = Partial<{
+  nodeId: number
+  name: string
+  lng: number
+  lat: number
+  nodeType: string
+}>
+
+export type CampusGraphEdgeVO = Partial<{
+  edgeId: number
+  fromNodeId: number
+  toNodeId: number
+  distanceM: number
+  costTimeSec: number
+  highlight: number
+}>
+
+export type CampusRiderVO = Partial<{
+  riderId: number
+  riderName: string
+  riderPhone: string
+  currentNodeId: number
+  activeLoad: number
+  highlight: number
+}>
+
+export type CampusGraphVO = Partial<{
+  orderId: number
+  riderId: number
+  dispatchStatus: number
+  dispatchStartTimeMs: number
+  serverTimeMs: number
+  routeText: string
+  routeNodeIds: number[]
+  nodes: CampusGraphNodeVO[]
+  edges: CampusGraphEdgeVO[]
+  riders: CampusRiderVO[]
+}>
+
 // 分页接口
 export type PageVO<T> = {
   total: number

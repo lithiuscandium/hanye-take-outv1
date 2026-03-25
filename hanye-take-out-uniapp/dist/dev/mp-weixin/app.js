@@ -5,6 +5,7 @@ if (!Math) {
   "./pages/index/index.js";
   "./pages/login/login.js";
   "./pages/my/my.js";
+  "./pages/rider/rider.js";
   "./pages/order/order.js";
   "./pages/detail/detail.js";
   "./pages/submit/submit.js";
@@ -33,7 +34,7 @@ const _sfc_main = /* @__PURE__ */ common_vendor.defineComponent({
     };
   }
 });
-const App = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__file", "D:/MyCode/public_project/hanye-take-out/hanye-take-out-uniapp/src/App.vue"]]);
+const App = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__file", "D:/new1/hanye-take-out/hanye-take-out-uniapp/src/App.vue"]]);
 const pinia = common_vendor.createPinia();
 pinia.use(common_vendor.src_default);
 function createApp() {

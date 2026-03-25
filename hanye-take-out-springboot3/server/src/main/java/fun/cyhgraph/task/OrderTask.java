@@ -2,6 +2,7 @@ package fun.cyhgraph.task;
 
 import fun.cyhgraph.entity.Order;
 import fun.cyhgraph.mapper.OrderMapper;
+import fun.cyhgraph.service.DispatchService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -20,6 +21,8 @@ public class OrderTask {
 
     @Autowired
     private OrderMapper orderMapper;
+    @Autowired
+    private DispatchService dispatchService;
 
     /**
      * 处理支付超时订单
@@ -59,6 +62,14 @@ public class OrderTask {
                 orderMapper.update(order);
             });
         }
+    }
+
+    /**
+     * 到达终点后延时自动完单（15秒）
+     */
+    @Scheduled(cron = "*/5 * * * * ?")
+    public void processReachedAutoCompleteOrder() {
+        dispatchService.autoCompleteReachedOrders();
     }
 
 }

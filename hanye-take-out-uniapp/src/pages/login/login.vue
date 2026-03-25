@@ -28,18 +28,53 @@ import type {LoginResult} from '@/types/user'
 // 先调用wx.login()，获取 code 登录凭证
 let code = ''
 onLoad(async () => {
+  // #ifdef MP-WEIXIN
   const res = await wx.login()
   code = res.code
+  // #endif
+
+  // #ifdef H5
+  const cacheKey = 'h5_login_code'
+  const cacheCode = uni.getStorageSync(cacheKey)
+  if (cacheCode) {
+    code = cacheCode
+  } else {
+    code = `h5_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
+    uni.setStorageSync(cacheKey, code)
+  }
+  // #endif
 })
 // 再携带code发送登录请求
 // 获取用户手机号码
 const login = async () => {
-  console.log('login')
-  // 登录请求
-  const res = await loginAPI(code)
-  console.log(res)
-  // 成功提示
-  loginSuccess(res.data)
+  try {
+    console.log('login')
+    if (!code) {
+      uni.showToast({
+        title: '登录凭证为空，请重试',
+        icon: 'none',
+      })
+      return
+    }
+    // 登录请求
+    const res = await loginAPI(code)
+    console.log(res)
+    // 登录失败时不再继续执行成功分支
+    if (res.code !== 0 || !res.data || !res.data.token || !res.data.id) {
+      uni.showToast({
+        title: res.msg || '登录失败',
+        icon: 'none',
+      })
+      return
+    }
+    // 成功提示
+    loginSuccess(res.data)
+  } catch (e) {
+    uni.showToast({
+      title: '登录异常，请稍后再试',
+      icon: 'none',
+    })
+  }
 }
 
 const loginSuccess = (profile: LoginResult) => {
@@ -49,17 +84,34 @@ const loginSuccess = (profile: LoginResult) => {
   // 成功提示
   uni.showToast({icon: 'success', title: '登录成功'})
   setTimeout(() => {
-    // 页面跳转
+    // 优先回到触发登录的原页面
+    const redirectUrl = uni.getStorageSync('login_redirect_url') as string
+    if (redirectUrl && redirectUrl !== '/pages/login/login') {
+      uni.removeStorageSync('login_redirect_url')
+      if (redirectUrl === '/pages/index/index' || redirectUrl === '/pages/my/my') {
+        uni.switchTab({url: redirectUrl})
+      } else {
+        uni.reLaunch({url: redirectUrl})
+      }
+      return
+    }
+    // 默认跳到“我的”
     uni.switchTab({url: '/pages/my/my'})
   }, 500)
 }
 
 const tips = async () => {
-  // 模拟登录
+  // #ifdef H5
+  await login()
+  // #endif
+
+  // #ifndef H5
+  // 小程序提示
   uni.showToast({
     title: '司辰，直接微信快捷登录就好哦~',
     icon: 'none',
   })
+  // #endif
 }
 </script>
 

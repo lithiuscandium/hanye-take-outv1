@@ -42,6 +42,12 @@
             <if test="districtName != null">
                 district_name = #{districtName},
             </if>
+            <if test="campusNodeId != null">
+                campus_node_id = #{campusNodeId},
+            </if>
+            <if test="isPublic != null">
+                is_public = #{isPublic},
+            </if>
         </set>
         where id = #{id}
     </update>
@@ -49,15 +55,19 @@
     <select id="getUserAddress" resultType="fun.cyhgraph.entity.AddressBook">
         select * from address_book
         <where>
-            <if test="userId != null">
-                and user_id = #{userId}
-            </if>
+            <choose>
+                <when test="isDefault != null">
+                    and user_id = #{userId}
+                    and is_default = #{isDefault}
+                </when>
+                <otherwise>
+                    and (user_id = #{userId} or is_public = 1)
+                </otherwise>
+            </choose>
             <if test="phone != null">
                 and phone = #{phone}
             </if>
-            <if test="isDefault != null">
-                and is_default = #{isDefault}
-            </if>
         </where>
+        order by is_default desc, is_public asc, id desc
     </select>
 </mapper>

@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "骑手调度台",
+  "usingComponents": {
+    "campus-graph-canvas": "../../components/campus/CampusGraphCanvas"
+  }
+}

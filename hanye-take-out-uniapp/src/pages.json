@@ -28,6 +28,12 @@
 			}
 		},
 		{
+			"path": "pages/rider/rider",
+			"style": {
+				"navigationBarTitleText": "骑手调度台"
+			}
+		},
+		{
 			"path": "pages/order/order",
 			"style": {
 				"navigationStyle": "custom", // 隐藏默认导航

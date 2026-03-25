@@ -8,7 +8,7 @@ const _sfc_main = /* @__PURE__ */ common_vendor.defineComponent({
   setup(__props) {
     const userStore = stores_modules_user.useUserStore();
     const user = common_vendor.reactive({
-      id: userStore.profile.id,
+      id: 0,
       name: "",
       gender: 1,
       phone: "未设置",
@@ -25,6 +25,12 @@ const _sfc_main = /* @__PURE__ */ common_vendor.defineComponent({
       }
     ];
     common_vendor.onLoad(async () => {
+      const currentProfile = userStore.profile;
+      if (!(currentProfile == null ? void 0 : currentProfile.id)) {
+        common_vendor.index.reLaunch({ url: "/pages/login/login" });
+        return;
+      }
+      user.id = currentProfile.id;
       console.log("userStore", userStore.profile);
       await getUserInfo(user.id);
     });
@@ -133,5 +139,5 @@ const _sfc_main = /* @__PURE__ */ common_vendor.defineComponent({
     };
   }
 });
-const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-cb595a61"], ["__file", "D:/MyCode/public_project/hanye-take-out/hanye-take-out-uniapp/src/pages/updateMy/updateMy.vue"]]);
+const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-cb595a61"], ["__file", "D:/new1/hanye-take-out/hanye-take-out-uniapp/src/pages/updateMy/updateMy.vue"]]);
 wx.createPage(MiniProgramPage);

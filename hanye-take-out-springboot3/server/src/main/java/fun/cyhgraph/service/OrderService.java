@@ -2,9 +2,11 @@ package fun.cyhgraph.service;
 
 import fun.cyhgraph.dto.*;
 import fun.cyhgraph.result.PageResult;
+import fun.cyhgraph.vo.DispatchDetailVO;
 import fun.cyhgraph.vo.OrderPaymentVO;
 import fun.cyhgraph.vo.OrderStatisticsVO;
 import fun.cyhgraph.vo.OrderSubmitVO;
+import fun.cyhgraph.vo.OrderTrackVO;
 import fun.cyhgraph.vo.OrderVO;
 
 public interface OrderService {
@@ -37,4 +39,10 @@ public interface OrderService {
     void complete(Integer id);
 
     void reminder(Integer id);
+
+    OrderTrackVO getTrackById(Integer id);
+
+    DispatchDetailVO getDispatchDetailByOrderId(Integer id);
+
+    void manualReassign(DispatchReassignDTO dispatchReassignDTO);
 }

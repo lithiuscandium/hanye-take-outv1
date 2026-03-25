@@ -31,4 +31,12 @@ public class AddressBook implements Serializable {
     private String detail; // 详细地址
     private String label;  // 标签
     private Integer isDefault;   // 是否默认 0否 1是
+    /**
+     * 绑定的校园节点id（公共地址必填）
+     */
+    private Integer campusNodeId;
+    /**
+     * 是否公共地址 0-用户私有 1-全员可见
+     */
+    private Integer isPublic;
 }

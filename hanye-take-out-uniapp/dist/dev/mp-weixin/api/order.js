@@ -27,6 +27,30 @@ const getOrderAPI = (id) => {
     method: "GET"
   });
 };
+const getOrderTrackAPI = (id) => {
+  return utils_http.http({
+    url: `/user/order/track/${id}`,
+    method: "GET"
+  });
+};
+const getCampusGraphAPI = () => {
+  return utils_http.http({
+    url: "/user/campus/graph",
+    method: "GET"
+  });
+};
+const getCampusGraphByOrderAPI = (id) => {
+  return utils_http.http({
+    url: `/user/campus/graph/order/${id}`,
+    method: "GET"
+  });
+};
+const getCampusGraphByRiderAPI = (riderId) => {
+  return utils_http.http({
+    url: `/user/campus/graph/rider/${riderId}`,
+    method: "GET"
+  });
+};
 const getOrderPageAPI = (params) => {
   console.log("params", params);
   return utils_http.http({
@@ -54,8 +78,12 @@ const urgeOrderAPI = (id) => {
   });
 };
 exports.cancelOrderAPI = cancelOrderAPI;
+exports.getCampusGraphAPI = getCampusGraphAPI;
+exports.getCampusGraphByOrderAPI = getCampusGraphByOrderAPI;
+exports.getCampusGraphByRiderAPI = getCampusGraphByRiderAPI;
 exports.getOrderAPI = getOrderAPI;
 exports.getOrderPageAPI = getOrderPageAPI;
+exports.getOrderTrackAPI = getOrderTrackAPI;
 exports.getUnPayOrderAPI = getUnPayOrderAPI;
 exports.payOrderAPI = payOrderAPI;
 exports.reOrderAPI = reOrderAPI;

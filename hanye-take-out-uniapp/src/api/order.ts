@@ -1,5 +1,13 @@
 import { http } from '@/utils/http'
-import type { OrderPageDTO, OrderSubmitVO, OrderVO, PageVO, OrderPaymentDTO } from '@/types/order'
+import type {
+  CampusGraphVO,
+  OrderPageDTO,
+  OrderSubmitVO,
+  OrderVO,
+  PageVO,
+  OrderPaymentDTO,
+  OrderTrackVO,
+} from '@/types/order'
 
 // 用户下单
 export const submitOrderAPI = (params: any) => {
@@ -32,6 +40,38 @@ export const getOrderAPI = (id: number) => {
   console.log('byd !!! id', id)
   return http<OrderVO>({
     url: `/user/order/orderDetail/${id}`,
+    method: 'GET',
+  })
+}
+
+// 查询订单轨迹信息
+export const getOrderTrackAPI = (id: number) => {
+  return http<OrderTrackVO>({
+    url: `/user/order/track/${id}`,
+    method: 'GET',
+  })
+}
+
+// 查询校园路网（全量）
+export const getCampusGraphAPI = () => {
+  return http<CampusGraphVO>({
+    url: '/user/campus/graph',
+    method: 'GET',
+  })
+}
+
+// 查询校园路网（按订单高亮）
+export const getCampusGraphByOrderAPI = (id: number) => {
+  return http<CampusGraphVO>({
+    url: `/user/campus/graph/order/${id}`,
+    method: 'GET',
+  })
+}
+
+// 查询校园路网（按骑手高亮）
+export const getCampusGraphByRiderAPI = (riderId: number) => {
+  return http<CampusGraphVO>({
+    url: `/user/campus/graph/rider/${riderId}`,
     method: 'GET',
   })
 }

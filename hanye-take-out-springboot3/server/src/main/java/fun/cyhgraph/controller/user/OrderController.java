@@ -7,6 +7,7 @@ import fun.cyhgraph.result.Result;
 import fun.cyhgraph.service.OrderService;
 import fun.cyhgraph.vo.OrderPaymentVO;
 import fun.cyhgraph.vo.OrderSubmitVO;
+import fun.cyhgraph.vo.OrderTrackVO;
 import fun.cyhgraph.vo.OrderVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,6 +70,17 @@ public class OrderController {
         log.info("订单id:{}", id);
         OrderVO orderVO = orderService.getById(id);
         return Result.success(orderVO);
+    }
+
+    /**
+     * 查询订单配送轨迹
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/track/{id}")
+    public Result<OrderTrackVO> getTrack(@PathVariable Integer id) {
+        return Result.success(orderService.getTrackById(id));
     }
 
     /**

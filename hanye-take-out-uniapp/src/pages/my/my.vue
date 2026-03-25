@@ -36,6 +36,13 @@
           <image class="to_right" src="../../static/icon/toRight.png"></image>
         </view>
       </view>
+      <view class="bottom_text" @click="goRiderPanel">
+        <image class="icon" src="../../static/icon/my.png"></image>
+        <view class="text_left">骑手调度台</view>
+        <view class="right_image">
+          <image class="to_right" src="../../static/icon/toRight.png"></image>
+        </view>
+      </view>
       <view class="bottom_text" @click="goMyself">
         <image class="icon" src="../../static/icon/my.png"></image>
         <view class="text_left">信息设置</view>
@@ -84,7 +91,7 @@
 <script lang="ts" setup>
 import pushMsg from '../../components/message/pushMsg.vue'
 import {ref, reactive} from 'vue'
-import {onLoad, onReachBottom} from '@dcloudio/uni-app'
+import {onReachBottom, onShow} from '@dcloudio/uni-app'
 import {useUserStore} from '@/stores/modules/user'
 import {getUserInfoAPI} from '@/api/user'
 import {getOrderPageAPI, reOrderAPI, urgeOrderAPI} from '@/api/order'
@@ -126,7 +133,7 @@ const statusList = [
 ]
 
 const user = reactive({
-  id: userStore.profile!.id,
+  id: 0,
   name: '',
   gender: 1,
   phone: '未设置',
@@ -139,12 +146,23 @@ const orderDTO = ref<OrderPageDTO>({
 })
 const total = ref(0)
 
-onLoad(async (options) => {
-  console.log('options', options)
+const loadPageData = async () => {
+  const currentProfile = userStore.profile
+  if (!currentProfile?.id) {
+    uni.reLaunch({url: '/pages/login/login'})
+    return
+  }
+  user.id = currentProfile.id
   console.log('userStore', userStore.profile)
-  const res = await getUserInfo(user.id)
-  // 获取所有订单信息
+  await getUserInfo(user.id)
+  // 每次进入页面重置列表，避免重复叠加
+  historyOrders.value = []
+  orderDTO.value.page = 1
   await getOrderPage()
+}
+
+onShow(async () => {
+  await loadPageData()
 })
 
 const getUserInfo = async (id: number) => {
@@ -211,17 +229,22 @@ const toOrderDetail = (id: number) => {
 }
 
 const goAddress = () => {
-  uni.redirectTo({
+  uni.navigateTo({
     url: '/pages/address/address',
   })
 }
 const goHistory = () => {
-  uni.redirectTo({
+  uni.navigateTo({
     url: '/pages/history/history',
   })
 }
+const goRiderPanel = () => {
+  uni.navigateTo({
+    url: '/pages/rider/rider',
+  })
+}
 const goMyself = () => {
-  uni.redirectTo({
+  uni.navigateTo({
     url: '/pages/updateMy/updateMy',
   })
 }

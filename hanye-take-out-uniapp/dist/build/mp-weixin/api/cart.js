@@ -1,0 +1,1 @@
+"use strict";const t=require("../utils/http.js");exports.addToCartAPI=r=>t.http({method:"POST",url:"/user/cart/add",data:r}),exports.cleanCartAPI=()=>t.http({method:"DELETE",url:"/user/cart/clean"}),exports.getCartAPI=()=>t.http({method:"GET",url:"/user/cart/list"}),exports.subCartAPI=r=>t.http({method:"PUT",url:"/user/cart/sub",data:r});

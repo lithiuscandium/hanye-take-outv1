@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted, watch } from 'vue'
+import { ref, reactive, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Empty from '@/components/Empty.vue'
+import CampusGraphPanel from '@/components/CampusGraphPanel.vue'
 import {
   getOrderDetailPageAPI,
   queryOrderDetailByIdAPI,
@@ -11,8 +12,11 @@ import {
   orderRejectAPI,
   orderAcceptAPI,
   getOrderListByAPI,
+  getDispatchDetailAPI,
+  reassignDispatchAPI,
+  getCampusGraphByOrderAPI,
 } from '@/api/order'
-import type { Order, OrderVO } from '@/types/order'
+import type { CampusGraphVO, DispatchDetailVO, Order, OrderVO } from '@/types/order'
 import { ElMessage } from 'element-plus'
 
 type OrderStatics = {
@@ -41,6 +45,12 @@ const page = ref(1)
 const pageSize = ref(10)
 const tableData = ref<Array<any>>([])
 const diaForm = ref<OrderVO>()
+const dispatchDetail = ref<DispatchDetailVO>()
+const dispatchLoading = ref(false)
+const reassignLoading = ref(false)
+const selectedRiderId = ref<number>()
+const campusGraph = ref<CampusGraphVO>()
+let graphRefreshTimer: ReturnType<typeof setInterval> | undefined
 const isSearch = ref(false)
 const orderStatus = ref(0) //列表字段展示所需订单状态,用于分页请求数据
 const dialogOrderStatus = ref(0) //弹窗所需订单状态，用于详情展示字段
@@ -157,6 +167,8 @@ const getOrderListBy3Status = async () => {
 const goDetail = async (id: any, status: number, row?: any) => {
   console.log('打开对话框，查看订单详情信息', id, status, row)
   orderId.value = id
+  dispatchDetail.value = undefined
+  selectedRiderId.value = undefined
   try {
     const { data: res } = await queryOrderDetailByIdAPI({ orderId: id })
     diaForm!.value = res.data
@@ -168,6 +180,9 @@ const goDetail = async (id: any, status: number, row?: any) => {
     }
     dialogVisible.value = true
     dialogOrderStatus.value = status
+    await loadDispatchDetail(Number(id))
+    await loadCampusGraphByOrder(Number(id))
+    startGraphAutoRefresh()
   } catch (err) {
     console.error('请求出错了：', err)
   }
@@ -184,6 +199,7 @@ const orderAccept = async (row: any) => {
       console.log('操作成功')
       orderId.value = 0
       dialogVisible.value = false
+      stopGraphAutoRefresh()
       await init(orderStatus.value)
       ElMessage.success('接单成功')
     } else {
@@ -254,6 +270,7 @@ const deliveryOrComplete = async (status: number, id: number) => {
       ElMessage.success(`${status === 3 ? '派送成功' : '订单完成'}`)
       orderId.value = 0
       dialogVisible.value = false
+      stopGraphAutoRefresh()
       // 刷新页面
       await init(orderStatus.value)
     } else {
@@ -264,8 +281,130 @@ const deliveryOrComplete = async (status: number, id: number) => {
   }
 }
 
+const getDispatchStatusText = (status?: number) => {
+  if (status === -1 || status === undefined) {
+    return '未派单'
+  }
+  if (status === 0) {
+    return '已分配'
+  }
+  if (status === 1) {
+    return '派送中'
+  }
+  if (status === 2) {
+    return '已完成'
+  }
+  if (status === 3) {
+    return '已取消'
+  }
+  return '-'
+}
+
+const formatSec = (sec?: number) => {
+  if (sec === undefined || sec === null) {
+    return '-'
+  }
+  const minutes = Math.floor(sec / 60)
+  const seconds = sec % 60
+  if (minutes <= 0) {
+    return `${seconds}秒`
+  }
+  if (seconds === 0) {
+    return `${minutes}分钟`
+  }
+  return `${minutes}分${seconds}秒`
+}
+
+const canManualReassign = () => {
+  return [2, 3, 4].includes(dialogOrderStatus.value) && ![2, 3].includes(Number(dispatchDetail.value?.dispatchStatus))
+}
+
+const loadDispatchDetail = async (id: number) => {
+  dispatchLoading.value = true
+  try {
+    const res = await getDispatchDetailAPI(id)
+    if (res.data.code === 0) {
+      dispatchDetail.value = res.data.data
+      selectedRiderId.value = dispatchDetail.value?.riderId
+    } else {
+      throw new Error(res.data.msg)
+    }
+  } catch (err) {
+    console.error('加载派单详情失败：', err)
+  } finally {
+    dispatchLoading.value = false
+  }
+}
+
+const loadCampusGraphByOrder = async (id: number) => {
+  try {
+    const res = await getCampusGraphByOrderAPI(id)
+    if (res.data.code === 0) {
+      campusGraph.value = res.data.data
+    } else {
+      throw new Error(res.data.msg)
+    }
+  } catch (err) {
+    console.error('加载校园路网失败：', err)
+    campusGraph.value = undefined
+  }
+}
+
+const stopGraphAutoRefresh = () => {
+  if (graphRefreshTimer) {
+    clearInterval(graphRefreshTimer)
+    graphRefreshTimer = undefined
+  }
+}
+
+const startGraphAutoRefresh = () => {
+  stopGraphAutoRefresh()
+  if (!orderId.value || dialogOrderStatus.value !== 4) {
+    return
+  }
+  graphRefreshTimer = setInterval(async () => {
+    if (!dialogVisible.value || !orderId.value) {
+      stopGraphAutoRefresh()
+      return
+    }
+    await loadDispatchDetail(Number(orderId.value))
+    await loadCampusGraphByOrder(Number(orderId.value))
+  }, 10000)
+}
+
+const manualReassign = async () => {
+  if (!orderId.value) {
+    return
+  }
+  if (!selectedRiderId.value) {
+    return ElMessage.warning('请先选择骑手')
+  }
+  reassignLoading.value = true
+  try {
+    const res = await reassignDispatchAPI({
+      orderId: Number(orderId.value),
+      riderId: Number(selectedRiderId.value),
+    })
+    if (res.data.code === 0) {
+      ElMessage.success('改派成功')
+      await loadDispatchDetail(Number(orderId.value))
+      await loadCampusGraphByOrder(Number(orderId.value))
+    } else {
+      throw new Error(res.data.msg)
+    }
+  } catch (err) {
+    console.error('人工改派失败：', err)
+  } finally {
+    reassignLoading.value = false
+  }
+}
+
 const handleClose = () => {
   dialogVisible.value = false
+  dispatchDetail.value = undefined
+  selectedRiderId.value = undefined
+  campusGraph.value = undefined
+  stopGraphAutoRefresh()
 }
 
 const handleSizeChange = (val: number) => {
@@ -314,6 +453,10 @@ onMounted(async () => {
   if (route.query.orderId && route.query.orderId !== 'undefined') {
     goDetail(route.query.orderId, 2)
   }
+})
+
+onBeforeUnmount(() => {
+  stopGraphAutoRefresh()
 })
 </script>
 
@@ -483,6 +626,34 @@ onMounted(async () => {
                 ? diaForm!.cancelReason || diaForm!.rejectionReason
                 : diaForm!.remark
                 }}</span>
+            </div>
+          </div>
+
+          <div class="dispatch-panel" v-loading="dispatchLoading">
+            <div class="dispatch-title">派单详情</div>
+            <template v-if="dispatchDetail && dispatchDetail.dispatchStatus !== -1">
+              <div class="dispatch-grid">
+                <div><span class="label">派单状态：</span>{{ getDispatchStatusText(dispatchDetail.dispatchStatus) }}</div>
+                <div><span class="label">当前骑手：</span>{{ dispatchDetail.riderName || '-' }} {{ dispatchDetail.riderPhone || '' }}</div>
+                <div><span class="label">评分：</span>{{ dispatchDetail.assignScore ?? '-' }}</div>
+                <div><span class="label">预计耗时：</span>{{ formatSec(dispatchDetail.etaSec) }}</div>
+                <div class="route-line"><span class="label">路线：</span>{{ dispatchDetail.routeText || '-' }}</div>
+              </div>
+              <div class="dispatch-ops" v-if="canManualReassign()">
+                <el-select v-model="selectedRiderId" placeholder="选择改派骑手" style="width: 280px">
+                  <el-option
+                    v-for="item in dispatchDetail.riderCandidates || []"
+                    :key="item.riderId"
+                    :label="`${item.riderName}（负载${item.activeLoad}，评分${item.score}，${item.currentNodeName || '未知位置'}）`"
+                    :value="item.riderId"
+                  />
+                </el-select>
+                <el-button type="primary" :loading="reassignLoading" @click="manualReassign">人工改派</el-button>
+              </div>
+            </template>
+            <div v-else class="dispatch-empty">当前订单暂无派单记录</div>
+            <div class="dispatch-graph">
+              <campus-graph-panel :graph="campusGraph" :height="430" />
             </div>
           </div>
 
@@ -881,6 +1052,53 @@ onMounted(async () => {
       span {
         color: #f56c6c;
       }
+    }
+  }
+
+  .dispatch-panel {
+    margin-top: 12px;
+    border: 1px solid #d8eef2;
+    border-radius: 6px;
+    background: #f8fcfd;
+    padding: 14px 18px;
+
+    .dispatch-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .dispatch-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 20px;
+      color: #333;
+      font-size: 13px;
+
+      .label {
+        color: #666;
+      }
+
+      .route-line {
+        width: 100%;
+      }
+    }
+
+    .dispatch-ops {
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .dispatch-empty {
+      color: #888;
+      font-size: 13px;
+    }
+
+    .dispatch-graph {
+      margin-top: 12px;
     }
   }
 

@@ -10,8 +10,8 @@
             <view class="item_left">
               <!-- 地址 -->
               <view class="details">
-                <text class="tag" :class="'tag' + trans(item.label as string)">{{
-                  getLableVal(item.label as string)
+                <text class="tag" :class="isPublicAddress(item) ? 'tag3' : 'tag' + trans(item.label as string)">{{
+                  isPublicAddress(item) ? '校园' : getLableVal(item.label as string)
                 }}</text>
                 <text class="address_word"
                   >{{ item.provinceName }}{{ item.cityName }}{{ item.districtName }}{{ item.detail }}</text
@@ -19,18 +19,22 @@
               </view>
               <!-- 性别及手机号 -->
               <view class="sale">
-                <text class="name">{{ item.gender === 1 ? item.consignee + ' 男士' : item.consignee + ' 女士' }}</text>
-                <text class="num">{{ item.phone }}</text>
+                <text class="name">{{ getContactText(item) }}</text>
+                <text class="num">{{ getPhoneText(item) }}</text>
               </view>
             </view>
             <!-- 右边 -->
             <view class="item_right">
-              <image @click.stop="addOrEdit('编辑', item)" class="edit" src="../../static/icon/edit.png"></image>
+              <image
+                v-if="!isPublicAddress(item)"
+                @click.stop="addOrEdit('编辑', item)"
+                class="edit"
+                src="../../static/icon/edit.png"
+              ></image>
             </view>
           </view>
           <!-- 下部 -->
           <view class="list_item_bottom">
-            <!-- :checked="Number(item.id) === current" -->
             <label class="radio" @click.stop="getRadio(index, item)">
               <radio
                 class="item_radio"
@@ -39,8 +43,9 @@
                 :value="String(item.id)"
                 :checked="item.isDefault === 1"
                 @click.stop="getRadio(index, item)"
-              />设为默认地址
+              />{{ isPublicAddress(item) ? '设为默认地址（保存到我的地址）' : '设为默认地址' }}
             </label>
+            <text v-if="isPublicAddress(item)" class="public_hint">公共节点地址（全员可选）</text>
           </view>
         </view>
         <!-- 无地址展示 -->
@@ -113,6 +118,25 @@ const getLableVal = (item: string) => {
     return '其他'
   }
   return item
+}
+
+const isPublicAddress = (item: Address) => Number(item?.isPublic || 0) === 1
+
+const getContactText = (item: Address) => {
+  if (isPublicAddress(item)) {
+    return item.consignee || '校园公共地址'
+  }
+  if (!item.consignee) {
+    return ''
+  }
+  return item.gender === 1 ? `${item.consignee} 男士` : `${item.consignee} 女士`
+}
+
+const getPhoneText = (item: Address) => {
+  if (isPublicAddress(item)) {
+    return '全员可选'
+  }
+  return item.phone || ''
 }
 
 // 编辑与新增，根据情况跳转不同页面
@@ -309,6 +333,12 @@ const getRadio = async (e: any, item: any) => {
           .item_radio {
             transform: scale(0.7);
           }
+        }
+
+        .public_hint {
+          margin-left: 12rpx;
+          font-size: 24rpx;
+          color: #999;
         }
       }
     }

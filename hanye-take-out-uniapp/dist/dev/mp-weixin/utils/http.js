@@ -1,7 +1,7 @@
 "use strict";
 const common_vendor = require("../common/vendor.js");
 const stores_modules_user = require("../stores/modules/user.js");
-const baseURL = "http://localhost:8081";
+let baseURL = "http://localhost:8081";
 const httpInterceptor = {
   // 拦截前触发
   invoke(options) {
@@ -35,7 +35,13 @@ const http = (options) => {
         } else if (res.statusCode === 401) {
           const userStore = stores_modules_user.useUserStore();
           userStore.clearProfile();
-          common_vendor.index.navigateTo({ url: "/pages/login/login" });
+          const pages = getCurrentPages();
+          const currentPage = pages[pages.length - 1];
+          const currentRoute = (currentPage == null ? void 0 : currentPage.route) ? `/${currentPage.route}` : "";
+          if (currentRoute && currentRoute !== "/pages/login/login") {
+            common_vendor.index.setStorageSync("login_redirect_url", currentRoute);
+          }
+          common_vendor.index.reLaunch({ url: "/pages/login/login" });
           reject(res);
         } else {
           common_vendor.index.showToast({

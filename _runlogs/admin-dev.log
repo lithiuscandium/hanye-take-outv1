@@ -1,0 +1,89 @@
+
+> login-reg@0.0.0 dev
+> vite
+
+
+  [32m[1mVITE[22m v5.2.10[39m  [2mready in [0m[1m1738[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m5173[22m/[39m
+  [32m➜[39m  [1mNetwork[22m: [36mhttp://198.18.0.1:[1m5173[22m/[39m
+  [32m➜[39m  [1mNetwork[22m: [36mhttp://172.22.128.1:[1m5173[22m/[39m
+  [32m➜[39m  [1mNetwork[22m: [36mhttp://192.168.0.125:[1m5173[22m/[39m
+  [32m➜[39m  [1mNetwork[22m: [36mhttp://172.18.128.1:[1m5173[22m/[39m
+[2m[32m  ➜[39m[22m[2m  press [22m[1mh + enter[22m[2m to show help[22m
+(node:33012) [DEP0060] DeprecationWarning: The `util._extend` API is deprecated. Please use Object.assign() instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[2m19:41:00[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /shop/status[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:41:00[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /order/conditionSearch?page=1&pageSize=10&status=2[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m19:41:00[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /workspace/businessData[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:23:34[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/views/dashboard/index.vue, /src/views/dashboard/components/orderList.vue, /src/views/order/index.vue[22m
+[2m20:23:49[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/views/order/index.vue[22m
+[2m20:24:01[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/views/order/index.vue[22m
+[2m20:24:06[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/views/order/index.vue?vue&type=style&index=0&scoped=69fb50eb&lang.less[22m
+[2m20:24:21[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/CampusGraphPanel.vue[22m
+[2m20:38:02[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /shop/status[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:38:02[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /order/conditionSearch?page=1&pageSize=10&status=2[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:38:02[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /workspace/businessData[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:38:19[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /employee/login[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:38:22[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /employee/login[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:38:38[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /employee/login[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:38:56[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /employee/register[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:38:57[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /employee/register[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:39:15[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /shop/status[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:39:15[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /order/conditionSearch?page=1&pageSize=10&status=2[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:39:15[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /workspace/businessData[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:39:18[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /shop/0[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1142:49)
+    at afterConnectMultiple (node:net:1723:7)
+[2m20:42:19[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/views/layout/index.vue[22m
+[2m20:49:55[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/CampusGraphPanel.vue[22m
+[2m20:50:08[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/CampusGraphPanel.vue?vue&type=style&index=0&scoped=c8eb007a&lang.less[22m
+[2m20:50:14[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/CampusGraphPanel.vue[22m
+[2m20:52:19[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/views/order/index.vue[22m
+[2m20:52:24[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/views/order/index.vue[22m
+[2m20:52:31[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/views/order/index.vue[22m
+[2m20:52:43[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/views/order/index.vue[22m
+[2m20:52:49[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/views/order/index.vue[22m

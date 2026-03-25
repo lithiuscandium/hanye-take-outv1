@@ -199,7 +199,10 @@ const audio2 = ref<HTMLAudioElement | null>(null)
 
 const webSocket = () => {
   const clientId = Math.random().toString(36).slice(2)
-  const socketUrl = 'ws://localhost:8081/ws/' + clientId
+  const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws'
+  const wsHost = window.location.hostname || 'localhost'
+  const wsPort = import.meta.env.VITE_WS_PORT || '8081'
+  const socketUrl = `${wsProtocol}://${wsHost}:${wsPort}/ws/${clientId}`
   console.log('socketUrl', socketUrl)
 
   if (typeof WebSocket == 'undefined') {

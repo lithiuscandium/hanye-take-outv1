@@ -52,6 +52,80 @@ export type OrderVO = Order & {
   orderDetailList: OrderDetail[]
 }
 
+export type CampusPointVO = Partial<{
+  nodeId: number
+  name: string
+  lng: number
+  lat: number
+}>
+
+export type DispatchRiderCandidateVO = Partial<{
+  riderId: number
+  riderName: string
+  riderPhone: string
+  activeLoad: number
+  score: number
+  pickupEtaSec: number
+  deliveryEtaSec: number
+  totalEtaSec: number
+  currentNodeId: number
+  currentNodeName: string
+}>
+
+export type DispatchDetailVO = Partial<{
+  orderId: number
+  dispatchStatus: number
+  riderId: number
+  riderName: string
+  riderPhone: string
+  assignScore: number
+  etaSec: number
+  progressIndex: number
+  totalPoints: number
+  routeText: string
+  routePoints: CampusPointVO[]
+  riderCandidates: DispatchRiderCandidateVO[]
+}>
+
+export type CampusGraphNodeVO = Partial<{
+  nodeId: number
+  name: string
+  lng: number
+  lat: number
+  nodeType: string
+}>
+
+export type CampusGraphEdgeVO = Partial<{
+  edgeId: number
+  fromNodeId: number
+  toNodeId: number
+  distanceM: number
+  costTimeSec: number
+  highlight: number
+}>
+
+export type CampusRiderVO = Partial<{
+  riderId: number
+  riderName: string
+  riderPhone: string
+  currentNodeId: number
+  activeLoad: number
+  highlight: number
+}>
+
+export type CampusGraphVO = Partial<{
+  orderId: number
+  riderId: number
+  dispatchStatus: number
+  dispatchStartTimeMs: number
+  serverTimeMs: number
+  routeText: string
+  routeNodeIds: number[]
+  nodes: CampusGraphNodeVO[]
+  edges: CampusGraphEdgeVO[]
+  riders: CampusRiderVO[]
+}>
+
 // 分页接口
 export type PageVO<T> = {
   total: number

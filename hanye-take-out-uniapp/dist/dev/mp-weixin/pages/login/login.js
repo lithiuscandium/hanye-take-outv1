@@ -13,16 +13,47 @@ const _sfc_main = /* @__PURE__ */ common_vendor.defineComponent({
       code = res.code;
     });
     const login = async () => {
-      console.log("login");
-      const res = await api_login.loginAPI(code);
-      console.log(res);
-      loginSuccess(res.data);
+      try {
+        console.log("login");
+        if (!code) {
+          common_vendor.index.showToast({
+            title: "登录凭证为空，请重试",
+            icon: "none"
+          });
+          return;
+        }
+        const res = await api_login.loginAPI(code);
+        console.log(res);
+        if (res.code !== 0 || !res.data || !res.data.token || !res.data.id) {
+          common_vendor.index.showToast({
+            title: res.msg || "登录失败",
+            icon: "none"
+          });
+          return;
+        }
+        loginSuccess(res.data);
+      } catch (e) {
+        common_vendor.index.showToast({
+          title: "登录异常，请稍后再试",
+          icon: "none"
+        });
+      }
     };
     const loginSuccess = (profile) => {
       const userStore = stores_modules_user.useUserStore();
       userStore.setProfile(profile);
       common_vendor.index.showToast({ icon: "success", title: "登录成功" });
       setTimeout(() => {
+        const redirectUrl = common_vendor.index.getStorageSync("login_redirect_url");
+        if (redirectUrl && redirectUrl !== "/pages/login/login") {
+          common_vendor.index.removeStorageSync("login_redirect_url");
+          if (redirectUrl === "/pages/index/index" || redirectUrl === "/pages/my/my") {
+            common_vendor.index.switchTab({ url: redirectUrl });
+          } else {
+            common_vendor.index.reLaunch({ url: redirectUrl });
+          }
+          return;
+        }
         common_vendor.index.switchTab({ url: "/pages/my/my" });
       }, 500);
     };
@@ -41,5 +72,5 @@ const _sfc_main = /* @__PURE__ */ common_vendor.defineComponent({
     };
   }
 });
-const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-cdfe2409"], ["__file", "D:/MyCode/public_project/hanye-take-out/hanye-take-out-uniapp/src/pages/login/login.vue"]]);
+const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-cdfe2409"], ["__file", "D:/new1/hanye-take-out/hanye-take-out-uniapp/src/pages/login/login.vue"]]);
 wx.createPage(MiniProgramPage);

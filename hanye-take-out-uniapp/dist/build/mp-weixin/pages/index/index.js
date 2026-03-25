@@ -1,0 +1,1 @@
+"use strict";const e=require("../../common/vendor.js"),o=e.defineComponent({__name:"index",setup(o){const r=()=>{e.index.navigateTo({url:"/pages/order/order"})};return(o,n)=>({a:e.o(r)})}}),r=e._export_sfc(o,[["__scopeId","data-v-a7a487b5"]]);wx.createPage(r);

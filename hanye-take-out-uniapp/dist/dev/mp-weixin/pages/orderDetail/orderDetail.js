@@ -11,9 +11,10 @@ if (!Array) {
 }
 const _easycom_uni_countdown = () => "../../node-modules/@dcloudio/uni-ui/lib/uni-countdown/uni-countdown.js";
 if (!Math) {
-  (_easycom_uni_countdown + pushMsg)();
+  (_easycom_uni_countdown + CampusGraphCanvas + pushMsg)();
 }
 const pushMsg = () => "../../components/message/pushMsg.js";
+const CampusGraphCanvas = () => "../../components/campus/CampusGraphCanvas.js";
 const _sfc_main = /* @__PURE__ */ common_vendor.defineComponent({
   __name: "orderDetail",
   setup(__props) {
@@ -49,6 +50,7 @@ const _sfc_main = /* @__PURE__ */ common_vendor.defineComponent({
       }
     ];
     const countdownStore = stores_modules_countdown.useCountdownStore();
+    let trackTimer;
     const order = common_vendor.reactive({
       id: 0,
       // 订单id
@@ -65,10 +67,24 @@ const _sfc_main = /* @__PURE__ */ common_vendor.defineComponent({
       orderDetailList: []
       // 订单详情
     });
+    const track = common_vendor.reactive({
+      orderId: 0,
+      dispatchStatus: -1,
+      routePoints: []
+    });
+    const campusGraph = common_vendor.ref();
     common_vendor.onLoad(async (options) => {
       console.log("options", options);
       order.id = options.orderId;
       await getOrderDetail();
+      await getOrderTrack();
+      await getCampusGraph();
+      if (order.status === 4) {
+        startTrackTimer();
+      }
+    });
+    common_vendor.onUnload(() => {
+      stopTrackTimer();
     });
     const getOrderDetail = async () => {
       console.log("获取订单详情");
@@ -76,6 +92,43 @@ const _sfc_main = /* @__PURE__ */ common_vendor.defineComponent({
       console.log("res", res);
       Object.assign(order, res.data);
       console.log("刷新得到新的order", order);
+    };
+    const getOrderTrack = async () => {
+      const res = await api_order.getOrderTrackAPI(order.id);
+      if (res.code === 0 && res.data) {
+        Object.assign(track, res.data);
+      }
+    };
+    const getCampusGraph = async () => {
+      const res = await api_order.getCampusGraphByOrderAPI(order.id);
+      if (res.code === 0) {
+        campusGraph.value = res.data;
+      }
+    };
+    const startTrackTimer = () => {
+      stopTrackTimer();
+      trackTimer = setInterval(async () => {
+        await getOrderTrack();
+        await getCampusGraph();
+        await getOrderDetail();
+        if (order.status !== 4) {
+          stopTrackTimer();
+        }
+      }, 5e3);
+    };
+    const stopTrackTimer = () => {
+      if (trackTimer) {
+        clearInterval(trackTimer);
+        trackTimer = void 0;
+      }
+    };
+    const formatEta = (etaSec) => {
+      if (etaSec === void 0 || etaSec === null) {
+        return "--";
+      }
+      const minutes = Math.floor(etaSec / 60);
+      const seconds = etaSec % 60;
+      return `${minutes}分${seconds}秒`;
     };
     const cancelOrder = async () => {
       console.log("取消订单");
@@ -99,6 +152,11 @@ const _sfc_main = /* @__PURE__ */ common_vendor.defineComponent({
         });
       }
       await getOrderDetail();
+      await getOrderTrack();
+      await getCampusGraph();
+      if (order.status !== 4) {
+        stopTrackTimer();
+      }
     };
     const pushOrder = async () => {
       console.log("催单");
@@ -107,11 +165,14 @@ const _sfc_main = /* @__PURE__ */ common_vendor.defineComponent({
       if (childComp.value) {
         childComp.value.openPopup();
       }
+      await getOrderTrack();
+      await getCampusGraph();
     };
     const reOrder = async () => {
       console.log("再来一单");
       await api_cart.cleanCartAPI();
       await api_order.reOrderAPI(order.id);
+      stopTrackTimer();
       common_vendor.index.redirectTo({
         url: "/pages/order/order"
       });
@@ -134,6 +195,7 @@ const _sfc_main = /* @__PURE__ */ common_vendor.defineComponent({
         clearInterval(countdownStore.timer);
         countdownStore.timer = void 0;
       }
+      stopTrackTimer();
       common_vendor.index.redirectTo({
         url: "/pages/pay/pay?orderId=" + order.id + "&orderNumber=" + order.number + "&orderAmount=" + order.amount + "&orderTime=" + order.orderTime
       });
@@ -169,7 +231,18 @@ const _sfc_main = /* @__PURE__ */ common_vendor.defineComponent({
       }, order.status === 2 || order.status === 6 ? {
         l: common_vendor.o(reOrder)
       } : {}, {
-        m: common_vendor.f(order.orderDetailList, (obj, index, i0) => {
+        m: common_vendor.p({
+          title: "配送路网与轨迹",
+          graph: campusGraph.value,
+          ["height-rpx"]: 480
+        }),
+        n: track.riderName
+      }, track.riderName ? {
+        o: common_vendor.t(track.riderName),
+        p: common_vendor.t(track.riderPhone),
+        q: common_vendor.t(formatEta(track.etaSec))
+      } : {}, {
+        r: common_vendor.f(order.orderDetailList, (obj, index, i0) => {
           return common_vendor.e({
             a: obj.pic,
             b: common_vendor.t(obj.name),
@@ -185,21 +258,21 @@ const _sfc_main = /* @__PURE__ */ common_vendor.defineComponent({
             h: index
           });
         }),
-        n: common_vendor.t(order.packAmount),
-        o: common_vendor.t(order.amount),
-        p: common_vendor.o(connectShop),
-        q: common_vendor.t(order.remark),
-        r: common_vendor.t(order.tablewareNumber == -1 ? "无需餐具" : order.tablewareNumber == 0 ? "商家根据餐量提供" : order.tablewareNumber),
-        s: common_vendor.t(order.number),
-        t: common_vendor.t(order.orderTime),
-        v: common_vendor.t(order.address),
-        w: common_vendor.t(order.packAmount === -1 ? "无需餐具" : order.packAmount === 0 ? "按餐量提供" : order.packAmount),
-        x: common_vendor.sr(childComp, "2d945b00-1", {
+        s: common_vendor.t(order.packAmount),
+        t: common_vendor.t(order.amount),
+        v: common_vendor.o(connectShop),
+        w: common_vendor.t(order.remark),
+        x: common_vendor.t(order.tablewareNumber == -1 ? "无需餐具" : order.tablewareNumber == 0 ? "商家根据餐量提供" : order.tablewareNumber),
+        y: common_vendor.t(order.number),
+        z: common_vendor.t(order.orderTime),
+        A: common_vendor.t(order.address),
+        B: common_vendor.t(order.packAmount === -1 ? "无需餐具" : order.packAmount === 0 ? "按餐量提供" : order.packAmount),
+        C: common_vendor.sr(childComp, "2d945b00-2", {
           "k": "childComp"
         })
       });
     };
   }
 });
-const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-2d945b00"], ["__file", "D:/MyCode/public_project/hanye-take-out/hanye-take-out-uniapp/src/pages/orderDetail/orderDetail.vue"]]);
+const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-2d945b00"], ["__file", "D:/new1/hanye-take-out/hanye-take-out-uniapp/src/pages/orderDetail/orderDetail.vue"]]);
 wx.createPage(MiniProgramPage);

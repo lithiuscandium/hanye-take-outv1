@@ -180,5 +180,7 @@ create table address_book (
     detail varchar(200) null comment '详细地址',
     label varchar(100) null comment '标签',
     is_default tinyint(1) not null default '0' comment '默认 0 否 1是',
+    campus_node_id int null comment '绑定校园节点id',
+    is_public tinyint(1) not null default '0' comment '是否公共地址 0否 1是',
     primary key (id)
 ) comment='地址簿';

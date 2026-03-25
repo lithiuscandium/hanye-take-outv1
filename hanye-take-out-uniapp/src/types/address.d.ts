@@ -13,6 +13,8 @@ export type Address = {
   detail?: string // 详细地址
   label?: string // 标签
   isDefault?: number // 是否默认 0否 1是
+  campusNodeId?: number // 绑定校园节点id
+  isPublic?: number // 是否公共地址 0否 1是
 }
 
 // picker中具体省市区类型

@@ -121,6 +121,11 @@
 .address .address_content .address_liests .list_item_bottom .radio .item_radio.data-v-2312e3da {
   transform: scale(0.7);
 }
+.address .address_content .address_liests .list_item_bottom .public_hint.data-v-2312e3da {
+  margin-left: 12rpx;
+  font-size: 24rpx;
+  color: #999;
+}
 .address .address_content .no_address.data-v-2312e3da {
   margin: 0 auto;
   height: 50rpx;

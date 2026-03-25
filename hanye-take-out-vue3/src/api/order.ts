@@ -1,4 +1,5 @@
 import request from '@/utils/request'
+import type { CampusGraphVO, DispatchDetailVO } from '@/types/order'
 
 // 查询列表页接口
 export const getOrderDetailPageAPI = (params: any) => {
@@ -65,6 +66,63 @@ export const orderRejectAPI = (params: any) => {
 export const getOrderListByAPI = () => {
   return request({
     url: '/order/statistics',
+    method: 'get'
+  })
+}
+
+// 查询派单详情
+export const getDispatchDetailAPI = (orderId: number) => {
+  return request<{
+    code: number
+    msg: string
+    data: DispatchDetailVO
+  }>({
+    url: `/order/dispatch/${orderId}`,
+    method: 'get'
+  })
+}
+
+// 人工改派
+export const reassignDispatchAPI = (params: { orderId: number, riderId: number }) => {
+  return request({
+    url: '/order/dispatch/reassign',
+    method: 'put',
+    data: params
+  })
+}
+
+// 校园路网（全量）
+export const getCampusGraphAPI = () => {
+  return request<{
+    code: number
+    msg: string
+    data: CampusGraphVO
+  }>({
+    url: '/campus/graph',
+    method: 'get'
+  })
+}
+
+// 校园路网（按订单高亮）
+export const getCampusGraphByOrderAPI = (orderId: number) => {
+  return request<{
+    code: number
+    msg: string
+    data: CampusGraphVO
+  }>({
+    url: `/campus/graph/order/${orderId}`,
+    method: 'get'
+  })
+}
+
+// 校园路网（按骑手高亮）
+export const getCampusGraphByRiderAPI = (riderId: number) => {
+  return request<{
+    code: number
+    msg: string
+    data: CampusGraphVO
+  }>({
+    url: `/campus/graph/rider/${riderId}`,
     method: 'get'
   })
 }

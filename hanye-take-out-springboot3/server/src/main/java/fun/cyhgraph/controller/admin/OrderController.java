@@ -4,9 +4,11 @@ import fun.cyhgraph.dto.OrderCancelDTO;
 import fun.cyhgraph.dto.OrderConfirmDTO;
 import fun.cyhgraph.dto.OrderPageDTO;
 import fun.cyhgraph.dto.OrderRejectionDTO;
+import fun.cyhgraph.dto.DispatchReassignDTO;
 import fun.cyhgraph.result.PageResult;
 import fun.cyhgraph.result.Result;
 import fun.cyhgraph.service.OrderService;
+import fun.cyhgraph.vo.DispatchDetailVO;
 import fun.cyhgraph.vo.OrderStatisticsVO;
 import fun.cyhgraph.vo.OrderVO;
 import lombok.extern.slf4j.Slf4j;
@@ -113,6 +115,30 @@ public class OrderController {
     public Result complete(@PathVariable Integer id){
         log.info("已完成：{}", id);
         orderService.complete(id);
+        return Result.success();
+    }
+
+    /**
+     * 获取派单详情
+     *
+     * @param id 订单id
+     * @return 派单详情
+     */
+    @GetMapping("/dispatch/{id}")
+    public Result<DispatchDetailVO> getDispatchDetail(@PathVariable Integer id) {
+        return Result.success(orderService.getDispatchDetailByOrderId(id));
+    }
+
+    /**
+     * 人工改派
+     *
+     * @param dispatchReassignDTO 改派参数
+     * @return
+     */
+    @PutMapping("/dispatch/reassign")
+    public Result reassign(@RequestBody DispatchReassignDTO dispatchReassignDTO) {
+        log.info("人工改派：{}", dispatchReassignDTO);
+        orderService.manualReassign(dispatchReassignDTO);
         return Result.success();
     }
 

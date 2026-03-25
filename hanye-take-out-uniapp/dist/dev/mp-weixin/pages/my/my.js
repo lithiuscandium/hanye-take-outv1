@@ -45,7 +45,7 @@ const _sfc_main = /* @__PURE__ */ common_vendor.defineComponent({
       }
     ];
     const user = common_vendor.reactive({
-      id: userStore.profile.id,
+      id: 0,
       name: "",
       gender: 1,
       phone: "未设置",
@@ -57,11 +57,21 @@ const _sfc_main = /* @__PURE__ */ common_vendor.defineComponent({
       pageSize: 6
     });
     const total = common_vendor.ref(0);
-    common_vendor.onLoad(async (options) => {
-      console.log("options", options);
+    const loadPageData = async () => {
+      const currentProfile = userStore.profile;
+      if (!(currentProfile == null ? void 0 : currentProfile.id)) {
+        common_vendor.index.reLaunch({ url: "/pages/login/login" });
+        return;
+      }
+      user.id = currentProfile.id;
       console.log("userStore", userStore.profile);
       await getUserInfo(user.id);
+      historyOrders.value = [];
+      orderDTO.value.page = 1;
       await getOrderPage();
+    };
+    common_vendor.onShow(async () => {
+      await loadPageData();
     });
     const getUserInfo = async (id) => {
       const res = await api_user.getUserInfoAPI(id);
@@ -110,17 +120,22 @@ const _sfc_main = /* @__PURE__ */ common_vendor.defineComponent({
       });
     };
     const goAddress = () => {
-      common_vendor.index.redirectTo({
+      common_vendor.index.navigateTo({
         url: "/pages/address/address"
       });
     };
     const goHistory = () => {
-      common_vendor.index.redirectTo({
+      common_vendor.index.navigateTo({
         url: "/pages/history/history"
       });
     };
+    const goRiderPanel = () => {
+      common_vendor.index.navigateTo({
+        url: "/pages/rider/rider"
+      });
+    };
     const goMyself = () => {
-      common_vendor.index.redirectTo({
+      common_vendor.index.navigateTo({
         url: "/pages/updateMy/updateMy"
       });
     };
@@ -133,8 +148,9 @@ const _sfc_main = /* @__PURE__ */ common_vendor.defineComponent({
         d: common_vendor.t(user.phone),
         e: common_vendor.o(goAddress),
         f: common_vendor.o(goHistory),
-        g: common_vendor.o(goMyself),
-        h: common_vendor.f(historyOrders.value, (item, index, i0) => {
+        g: common_vendor.o(goRiderPanel),
+        h: common_vendor.o(goMyself),
+        i: common_vendor.f(historyOrders.value, (item, index, i0) => {
           return common_vendor.e({
             a: common_vendor.t(item.number),
             b: common_vendor.f(item.orderDetailList, (dish, index2, i1) => {
@@ -156,12 +172,12 @@ const _sfc_main = /* @__PURE__ */ common_vendor.defineComponent({
             k: common_vendor.o(($event) => toOrderDetail(item.id), index)
           });
         }),
-        i: common_vendor.sr(childComp, "d3687551-0", {
+        j: common_vendor.sr(childComp, "d3687551-0", {
           "k": "childComp"
         })
       });
     };
   }
 });
-const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-d3687551"], ["__file", "D:/MyCode/public_project/hanye-take-out/hanye-take-out-uniapp/src/pages/my/my.vue"]]);
+const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-d3687551"], ["__file", "D:/new1/hanye-take-out/hanye-take-out-uniapp/src/pages/my/my.vue"]]);
 wx.createPage(MiniProgramPage);

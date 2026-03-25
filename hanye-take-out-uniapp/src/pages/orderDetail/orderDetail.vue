@@ -27,6 +27,12 @@
       <view class="reOrder" v-if="order.status === 2 || order.status === 6" @click="reOrder">再来一单</view>
     </view>
   </view>
+  <view class="white_box">
+    <campus-graph-canvas title="配送路网与轨迹" :graph="campusGraph" :height-rpx="480" />
+    <view class="track_info" v-if="track.riderName">
+      骑手：{{ track.riderName }} {{ track.riderPhone }} ｜预计送达：{{ formatEta(track.etaSec) }}
+    </view>
+  </view>
   <!-- 1、订单菜品列表 -->
   <view class="white_box">
     <view class="word_text">
@@ -110,12 +116,21 @@
 
 <script lang="ts" setup>
 import pushMsg from '../../components/message/pushMsg.vue'
-import {ref, reactive} from 'vue'
-import {onLoad} from '@dcloudio/uni-app'
-import {getOrderAPI, cancelOrderAPI, reOrderAPI, urgeOrderAPI, payOrderAPI} from '@/api/order'
+import CampusGraphCanvas from '@/components/campus/CampusGraphCanvas.vue'
+import {reactive, ref} from 'vue'
+import {onLoad, onUnload} from '@dcloudio/uni-app'
+import {
+  getCampusGraphByOrderAPI,
+  getOrderAPI,
+  cancelOrderAPI,
+  getOrderTrackAPI,
+  reOrderAPI,
+  urgeOrderAPI,
+  payOrderAPI,
+} from '@/api/order'
 import {cleanCartAPI} from '@/api/cart'
 import {useCountdownStore} from '@/stores/modules/countdown'
-import type {Order, OrderVO} from '@/types/order'
+import type {CampusGraphVO, OrderTrackVO, OrderVO} from '@/types/order'
 
 const childComp: any = ref(null)
 
@@ -151,6 +166,7 @@ const statusList = [
 ]
 
 const countdownStore = useCountdownStore()
+let trackTimer: ReturnType<typeof setInterval> | undefined
 
 const order = reactive<OrderVO>({
   id: 0, // 订单id
@@ -162,10 +178,26 @@ const order = reactive<OrderVO>({
   orderDetailList: [], // 订单详情
 })
 
+const track = reactive<OrderTrackVO>({
+  orderId: 0,
+  dispatchStatus: -1,
+  routePoints: [],
+})
+const campusGraph = ref<CampusGraphVO>()
+
 onLoad(async (options) => {
   console.log('options', options)
   order.id = options!.orderId
   await getOrderDetail()
+  await getOrderTrack()
+  await getCampusGraph()
+  if (order.status === 4) {
+    startTrackTimer()
+  }
+})
+
+onUnload(() => {
+  stopTrackTimer()
 })
 
 const getOrderDetail = async () => {
@@ -174,6 +206,48 @@ const getOrderDetail = async () => {
   console.log('res', res)
   Object.assign(order, res.data)
   console.log('刷新得到新的order', order)
+}
+
+const getOrderTrack = async () => {
+  const res = await getOrderTrackAPI(order.id as number)
+  if (res.code === 0 && res.data) {
+    Object.assign(track, res.data)
+  }
+}
+
+const getCampusGraph = async () => {
+  const res = await getCampusGraphByOrderAPI(order.id as number)
+  if (res.code === 0) {
+    campusGraph.value = res.data
+  }
+}
+
+const startTrackTimer = () => {
+  stopTrackTimer()
+  trackTimer = setInterval(async () => {
+    await getOrderTrack()
+    await getCampusGraph()
+    await getOrderDetail()
+    if (order.status !== 4) {
+      stopTrackTimer()
+    }
+  }, 5000)
+}
+
+const stopTrackTimer = () => {
+  if (trackTimer) {
+    clearInterval(trackTimer)
+    trackTimer = undefined
+  }
+}
+
+const formatEta = (etaSec?: number) => {
+  if (etaSec === undefined || etaSec === null) {
+    return '--'
+  }
+  const minutes = Math.floor(etaSec / 60)
+  const seconds = etaSec % 60
+  return `${minutes}分${seconds}秒`
 }
 
 // 只有待付款，或者商家接单前，才能取消订单
@@ -199,6 +273,11 @@ const cancelOrder = async () => {
   }
   // 取消订单后，无论成功还是失败都要重新获取订单详情，刷新页面使得数据合法
   await getOrderDetail()
+  await getOrderTrack()
+  await getCampusGraph()
+  if (order.status !== 4) {
+    stopTrackTimer()
+  }
 }
 
 // 催单
@@ -214,6 +293,8 @@ const pushOrder = async () => {
   //   title: '已催单',
   //   icon: 'none',
   // })
+  await getOrderTrack()
+  await getCampusGraph()
 }
 
 // 再来一单
@@ -223,6 +304,7 @@ const reOrder = async () => {
   await cleanCartAPI()
   // 再来一单会将当前订单的菜品批量加入购物车，跳转到订单页面后，购物车将高亮显示
   await reOrderAPI(order.id as number)
+  stopTrackTimer()
   uni.redirectTo({
     url: '/pages/order/order',
   })
@@ -250,6 +332,7 @@ const toPay = async () => {
     clearInterval(countdownStore.timer)
     countdownStore.timer = undefined
   }
+  stopTrackTimer()
   uni.redirectTo({
     url:
       '/pages/pay/pay?orderId=' +
@@ -440,6 +523,17 @@ const toPay = async () => {
       top: 30rpx;
       right: 28rpx;
     }
+  }
+  .track_map {
+    width: 100%;
+    height: 360rpx;
+    border-radius: 16rpx;
+    overflow: hidden;
+  }
+  .track_info {
+    padding: 16rpx 24rpx 24rpx;
+    font-size: 24rpx;
+    color: #666666;
   }
   .bottom_text {
     display: flex;

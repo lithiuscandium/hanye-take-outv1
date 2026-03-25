@@ -14,13 +14,16 @@ import fun.cyhgraph.exception.OrderBusinessException;
 import fun.cyhgraph.exception.ShoppingCartBusinessException;
 import fun.cyhgraph.mapper.*;
 import fun.cyhgraph.result.PageResult;
+import fun.cyhgraph.service.DispatchService;
 import fun.cyhgraph.service.OrderService;
 import fun.cyhgraph.utils.HttpClientUtil;
 import fun.cyhgraph.utils.WeChatPayUtil;
 import fun.cyhgraph.vo.OrderPaymentVO;
 import fun.cyhgraph.vo.OrderStatisticsVO;
 import fun.cyhgraph.vo.OrderSubmitVO;
+import fun.cyhgraph.vo.OrderTrackVO;
 import fun.cyhgraph.vo.OrderVO;
+import fun.cyhgraph.vo.DispatchDetailVO;
 import fun.cyhgraph.websocket.WebSocketServer;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.weaver.ast.Or;
@@ -57,6 +60,8 @@ public class OrderServiceImpl implements OrderService {
     private Order order;
     @Autowired
     private WebSocketServer webSocketServer;
+    @Autowired
+    private DispatchService dispatchService;
     // 这个Value是annotation注解的包，不是lombok的！
     @Value("${hanye.shop.address}")
     private String shopAddress;
@@ -70,15 +75,20 @@ public class OrderServiceImpl implements OrderService {
      * @return
      */
     public OrderSubmitVO submit(OrderSubmitDTO orderSubmitDTO) {
+        Integer userId = BaseContext.getCurrentId();
         // 1、查询校验地址情况
         AddressBook addressBook = addressBookMapper.getById(orderSubmitDTO.getAddressId());
         if (addressBook == null) {
             throw new AddressBookBusinessException(MessageConstant.ADDRESS_BOOK_IS_NULL);
         }
+        boolean isPublicAddress = addressBook.getIsPublic() != null && addressBook.getIsPublic() == 1;
+        boolean isOwnAddress = addressBook.getUserId() != null && addressBook.getUserId().equals(userId);
+        if (!isPublicAddress && !isOwnAddress) {
+            throw new AddressBookBusinessException("所选地址不可用");
+        }
         // 不能超出配送范围
         // checkOutOfRange(addressBook.getCityName() + addressBook.getDistrictName() + addressBook.getDetail());
         // 2、查询校验购物车情况
-        Integer userId = BaseContext.getCurrentId();
         Cart cart = new Cart();
         cart.setUserId(userId);
         List<Cart> cartList = cartMapper.list(cart);
@@ -114,6 +124,8 @@ public class OrderServiceImpl implements OrderService {
         orderDetailMapper.insertBatch(orderDetailList);
         // 6、清理购物车中的数据
         cartMapper.delete(userId);
+        // 7、自动派单（基础版：评分 + 最短路）
+        dispatchService.autoAssignOrder(order);
         // 7、封装返回结果
         OrderSubmitVO orderSubmitVO = OrderSubmitVO.builder()
                 .id(order.getId())
@@ -219,6 +231,7 @@ public class OrderServiceImpl implements OrderService {
         order.setCancelReason("用户取消");
         order.setCancelTime(LocalDateTime.now());
         orderMapper.update(order);
+        dispatchService.onOrderCanceled(id);
     }
 
     /**
@@ -353,6 +366,7 @@ public class OrderServiceImpl implements OrderService {
         order.setRejectionReason(orderRejectionDTO.getRejectionReason());
         order.setCancelTime(LocalDateTime.now());
         orderMapper.update(order);
+        dispatchService.onOrderCanceled(orderId);
     }
 
     /**
@@ -372,6 +386,7 @@ public class OrderServiceImpl implements OrderService {
         order.setCancelReason(orderCancelDTO.getCancelReason());
         order.setCancelTime(LocalDateTime.now());
         orderMapper.update(order);
+        dispatchService.onOrderCanceled(orderId);
     }
 
     /**
@@ -389,6 +404,7 @@ public class OrderServiceImpl implements OrderService {
         order.setId(orderDB.getId());
         order.setStatus(Order.DELIVERY_IN_PROGRESS);
         orderMapper.update(order);
+        dispatchService.onOrderDeliveryStart(id);
     }
 
     /**
@@ -407,6 +423,7 @@ public class OrderServiceImpl implements OrderService {
         order.setStatus(Order.COMPLETED);
         order.setDeliveryTime(LocalDateTime.now()); // 设置订单完成时间
         orderMapper.update(order);
+        dispatchService.onOrderCompleted(id);
     }
 
     /**
@@ -427,6 +444,24 @@ public class OrderServiceImpl implements OrderService {
         String json = JSON.toJSONString(map);
         log.info("发给商家端啊！：{}", map);
         webSocketServer.sendToAllClient(json);
+    }
+
+    @Override
+    public OrderTrackVO getTrackById(Integer id) {
+        return dispatchService.getTrackByOrderId(id);
+    }
+
+    @Override
+    public DispatchDetailVO getDispatchDetailByOrderId(Integer id) {
+        return dispatchService.getDispatchDetailByOrderId(id);
+    }
+
+    @Override
+    public void manualReassign(DispatchReassignDTO dispatchReassignDTO) {
+        if (dispatchReassignDTO == null) {
+            return;
+        }
+        dispatchService.manualReassign(dispatchReassignDTO.getOrderId(), dispatchReassignDTO.getRiderId());
     }
 
     /**

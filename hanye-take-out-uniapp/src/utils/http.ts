@@ -1,7 +1,10 @@
 import { useUserStore } from '@/stores/modules/user'
 
 // 请求基地址
-const baseURL = 'http://localhost:8081'
+let baseURL = 'http://localhost:8081'
+// #ifdef H5
+baseURL = `${window.location.protocol}//${window.location.hostname}:8081`
+// #endif
 
 // 拦截器配置
 const httpInterceptor = {
@@ -57,8 +60,15 @@ export const http = <T>(options: UniApp.RequestOptions) => {
           // 清理用户信息
           const userStore = useUserStore()
           userStore.clearProfile()
+          // 记录登录后回跳页面（避免总是回到“我的”页）
+          const pages = getCurrentPages()
+          const currentPage = pages[pages.length - 1] as { route?: string } | undefined
+          const currentRoute = currentPage?.route ? `/${currentPage.route}` : ''
+          if (currentRoute && currentRoute !== '/pages/login/login') {
+            uni.setStorageSync('login_redirect_url', currentRoute)
+          }
           // 跳转到登录页
-          uni.navigateTo({ url: '/pages/login/login' })
+          uni.reLaunch({ url: '/pages/login/login' })
           reject(res)
         } else {
           // 通用错误, 调用reject, 轻量提示框
